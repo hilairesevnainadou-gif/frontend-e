@@ -4,8 +4,9 @@ const isDev = process.env.NODE_ENV !== "production";
 
 const nextConfig: NextConfig = {
   // Standalone output bundles only the dependencies actually used, so the app
-  // can be deployed to shared hosting without uploading node_modules.
-  output: "standalone",
+  // can be deployed to shared hosting without uploading node_modules. Vercel
+  // builds its own serverless output and must not get the standalone bundle.
+  output: process.env.VERCEL ? undefined : "standalone",
   images: {
     // The Laravel API runs on localhost in dev, which resolves to a loopback
     // IP; Next's SSRF guard blocks that by default regardless of remotePatterns.
