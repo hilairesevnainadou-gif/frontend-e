@@ -45,16 +45,16 @@ export default function ProductGallery({
 
   if (gallery.length === 0) {
     return (
-      <div className="w-full max-w-[500px] mx-auto aspect-square rounded-xl bg-muted flex items-center justify-center text-muted-foreground text-sm">
+      <div className="w-full mx-auto aspect-square rounded-xl bg-muted flex items-center justify-center text-muted-foreground text-sm">
         Image indisponible
       </div>
     );
   }
 
   return (
-    <div className="w-full max-w-[500px] mx-auto flex flex-col items-center px-4">
+    <div className="w-full mx-auto flex flex-col">
       <div
-        className="relative w-full rounded-xl shadow-lg overflow-hidden mb-4 aspect-square bg-muted"
+        className="relative w-full rounded-xl border border-border overflow-hidden mb-3 aspect-square bg-white"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
@@ -65,8 +65,8 @@ export default function ProductGallery({
           fill
           priority
           fetchPriority="high"
-          sizes="(min-width: 1024px) 500px, 100vw"
-          className="object-cover"
+          sizes="(min-width: 1024px) 46vw, 100vw"
+          className="object-contain p-6"
         />
 
         {hasMultiple && (
@@ -105,7 +105,7 @@ export default function ProductGallery({
       </div>
 
       {hasMultiple && (
-        <div className="flex gap-2 overflow-x-auto w-full pb-1 justify-center">
+        <div className="flex gap-2 overflow-x-auto w-full pb-1">
           {gallery.map((img, index) => (
             <button
               key={img.id}
@@ -113,7 +113,7 @@ export default function ProductGallery({
               onClick={() => goTo(index)}
               aria-label={`Voir l'image ${index + 1}`}
               className={cn(
-                "relative shrink-0 h-16 w-16 rounded-lg overflow-hidden border-2 transition-colors",
+                "relative shrink-0 h-16 w-16 rounded-lg overflow-hidden border-2 bg-white transition-colors",
                 index === activeIndex
                   ? "border-primary"
                   : "border-transparent opacity-70 hover:opacity-100"
@@ -124,7 +124,7 @@ export default function ProductGallery({
                 alt=""
                 fill
                 sizes="64px"
-                className="object-cover"
+                className="object-contain p-1"
               />
             </button>
           ))}
