@@ -37,6 +37,13 @@ const nextConfig: NextConfig = {
         hostname: "plus.unsplash.com",
         pathname: "/**",
       },
+      // Supplier catalogue: product photos are served straight from Ovelo's
+      // CDN rather than copied onto our storage.
+      {
+        protocol: "https",
+        hostname: "www.ovelo.fr",
+        pathname: "/**",
+      },
       ...(isDev
         ? [
             {
