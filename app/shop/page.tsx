@@ -2,6 +2,7 @@ import CountdownTimer from "@/components/home/CountdownTimer";
 import ProductCard from "@/components/home/ProductCard";
 import ShopFilters from "@/components/shop/ShopFilters";
 import { getBanners, getCategories, getProducts, getSettings } from "@/lib/api";
+import { buildPriceBuckets } from "@/lib/price-buckets";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -52,7 +53,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         ? "shop_all"
         : null;
 
-  const [products, categories, banners, settings] = await Promise.all([
+  const [products, categories, banners, settings, allProducts] = await Promise.all([
     getProducts({
       ...(search ? { search } : {}),
       ...(showNewOnly ? { isNew: true } : {}),
@@ -64,8 +65,11 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
     getCategories(),
     bannerPosition ? getBanners(bannerPosition) : Promise.resolve([]),
     getSettings(),
+    // Unfiltered, so the budget brackets stay stable while filtering.
+    getProducts(),
   ]);
   const banner = banners[0] || null;
+  const priceBuckets = buildPriceBuckets(allProducts.map((p) => Number(p.price)));
 
   const heading = search
     ? `Résultats pour « ${search} »`
@@ -137,26 +141,26 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           </div>
         )}
 
-        <div className="grid lg:grid-cols-[240px_1fr] gap-10">
-          <aside className="lg:sticky lg:top-24 lg:self-start">
-            <ShopFilters categories={categories} />
-          </aside>
+        <ShopFilters categories={categories} priceBuckets={priceBuckets} />
 
-          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
-            {products.length > 0 ? (
-              products.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))
-            ) : (
-              <div className="col-span-full flex flex-col items-center justify-center py-16 text-center">
-                <div className="text-6xl mb-4">🔍</div>
-                <h3 className="text-xl font-semibold text-foreground mb-2">
-                  Aucun produit trouvé
-                </h3>
-                <p className="text-muted-foreground mb-4">{emptyMessage}</p>
-              </div>
-            )}
-          </div>
+        <p className="mb-6 text-sm text-muted-foreground">
+          {products.length} produit{products.length > 1 ? "s" : ""}
+        </p>
+
+        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {products.length > 0 ? (
+            products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))
+          ) : (
+            <div className="col-span-full flex flex-col items-center justify-center py-16 text-center">
+              <div className="text-6xl mb-4">🔍</div>
+              <h3 className="text-xl font-semibold text-foreground mb-2">
+                Aucun produit trouvé
+              </h3>
+              <p className="text-muted-foreground mb-4">{emptyMessage}</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

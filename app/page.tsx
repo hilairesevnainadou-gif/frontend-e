@@ -6,6 +6,7 @@ import SecondaryBanners from "@/components/home/SecondaryBanners";
 import ShopFilters from "@/components/shop/ShopFilters";
 import { Button } from "@/components/ui/button";
 import { getCategories, getProducts } from "@/lib/api";
+import { buildPriceBuckets } from "@/lib/price-buckets";
 import Link from "next/link";
 
 interface HomeProps {
@@ -27,7 +28,7 @@ export default async function Home({ searchParams }: HomeProps) {
   const minPrice = min_price ? Number(min_price) : undefined;
   const maxPrice = max_price ? Number(max_price) : undefined;
 
-  const [products, categories] = await Promise.all([
+  const [products, categories, allProducts] = await Promise.all([
     getProducts({
       ...(search ? { search } : {}),
       ...(showNewOnly ? { isNew: true } : {}),
@@ -37,7 +38,10 @@ export default async function Home({ searchParams }: HomeProps) {
       ...(maxPrice !== undefined ? { maxPrice } : {}),
     }),
     getCategories(),
+    // Unfiltered, so the budget brackets stay stable while filtering.
+    getProducts(),
   ]);
+  const priceBuckets = buildPriceBuckets(allProducts.map((p) => Number(p.price)));
 
   const heading = search
     ? `Résultats pour « ${search} »`
@@ -64,13 +68,11 @@ export default async function Home({ searchParams }: HomeProps) {
           {heading}
         </h2>
 
-        <div className="grid lg:grid-cols-[240px_1fr] gap-10">
-          <aside className="lg:sticky lg:top-24 lg:self-start">
-            <ShopFilters categories={categories} />
-          </aside>
+        <ShopFilters categories={categories} priceBuckets={priceBuckets} />
 
+        <div>
           <div>
-            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {displayedProducts.length > 0 ? (
                 displayedProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
